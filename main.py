@@ -14,6 +14,10 @@ app = FastAPI()
 
 class Prompt(BaseModel):
     prompt: str
+    negative_prompt: str | None = None  # optional
+    guidance_scale: float = 7.5
+    num_inference_steps: int = 50
+
 
 # Detect device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -39,7 +43,13 @@ def txt2img(p: Prompt):
         raise HTTPException(status_code=400, detail="Prompt must not be empty.")
 
     try:
-        image = pipe(prompt).images[0]
+        image = pipe(
+            prompt=prompt,
+            negative_prompt=p.negative_prompt,
+            guidance_scale=p.guidance_scale,
+            num_inference_steps=p.num_inference_steps
+        ).images[0]
+
     except Exception as e:
         logger.exception("Image generation failed.")
         raise HTTPException(status_code=500, detail="Failed to generate image.")
