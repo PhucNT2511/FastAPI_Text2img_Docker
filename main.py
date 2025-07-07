@@ -14,9 +14,11 @@ app = FastAPI()
 
 class Prompt(BaseModel):
     prompt: str
-    negative_prompt: str | None = None  # optional
-    guidance_scale: float = 7.5
-    num_inference_steps: int = 50
+    negative_prompt: str | None = None
+    guidance_scale: float = Field(7.5, ge=1.0, le=30.0)
+    num_inference_steps: int = Field(50, ge=1, le=100)
+    height: int = Field(512, ge=64, le=1024)
+    width: int = Field(512, ge=64, le=1024)
 
 
 # Detect device
@@ -47,7 +49,9 @@ def txt2img(p: Prompt):
             prompt=prompt,
             negative_prompt=p.negative_prompt,
             guidance_scale=p.guidance_scale,
-            num_inference_steps=p.num_inference_steps
+            num_inference_steps=p.num_inference_steps,
+            height=p.height,
+            width=p.width
         ).images[0]
 
     except Exception as e:
